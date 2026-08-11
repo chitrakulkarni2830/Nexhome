@@ -1,5 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.db.database import engine, Base
+import app.models.user
+import app.models.device
+
+Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(title="NexHome Core Service")
 
