@@ -10,6 +10,7 @@ app.use(express.json());
 
 // In-memory store for recent telemetry data
 const deviceTelemetry = new Map();
+let sseClients = [];
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'NexHome Ingestion' });
@@ -37,6 +38,12 @@ app.post('/telemetry', (req, res) => {
         history.shift();
     }
     
+    // Broadcast to connected SSE clients
+    const eventData = JSON.stringify({ device_id, timestamp, metrics });
+    sseClients.forEach(client => {
+        client.write(`data: ${eventData}\n\n`);
+    });
+    
     res.status(202).json({ status: 'accepted' });
 });
 
@@ -44,6 +51,22 @@ app.get('/telemetry/:device_id', (req, res) => {
     const deviceId = parseInt(req.params.device_id);
     const history = deviceTelemetry.get(deviceId) || [];
     res.json(history);
+});
+
+// SSE endpoint for real-time streaming
+app.get('/stream', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
+    // Send initial connection success message
+    res.write('data: {"status":"connected"}\n\n');
+    
+    sseClients.push(res);
+    
+    req.on('close', () => {
+        sseClients = sseClients.filter(client => client !== res);
+    });
 });
 
 app.listen(PORT, () => {
