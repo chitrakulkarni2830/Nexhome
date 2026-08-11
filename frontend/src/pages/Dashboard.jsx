@@ -18,6 +18,51 @@ const Dashboard = () => {
     fetchDevices();
   }, [token]);
 
+  // Real-time telemetry integration via SSE
+  useEffect(() => {
+    const eventSource = new EventSource('http://localhost:3001/stream');
+    
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.status === 'connected') {
+          console.log('Connected to real-time telemetry stream');
+          return;
+        }
+        
+        // Update the specific device's state dynamically
+        if (data.device_id && data.metrics) {
+          setDevices(prevDevices => 
+            prevDevices.map(device => {
+              if (device.id === data.device_id) {
+                // If it has temperature metrics, show it, otherwise show a general string
+                let newStateValue = device.state_value;
+                if (data.metrics.temperature) {
+                  newStateValue = `${data.metrics.temperature}°C`;
+                } else if (data.metrics.power) {
+                  newStateValue = `${data.metrics.power}W`;
+                }
+                
+                return { ...device, state_value: newStateValue };
+              }
+              return device;
+            })
+          );
+        }
+      } catch (err) {
+        console.error('Error parsing SSE data', err);
+      }
+    };
+    
+    eventSource.onerror = (err) => {
+      console.error('SSE connection error', err);
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [setDevices]);
+
   const fetchDevices = async () => {
     try {
       setLoading(true);
