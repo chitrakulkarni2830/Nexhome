@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.database import engine, Base
 import app.models.user
 import app.models.device
-from app.api import auth
+from app.api import auth, devices
 
 Base.metadata.create_all(bind=engine)
 
@@ -20,7 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api")
-
+app.include_router(devices.router, prefix="/api")
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "NexHome Core"}
