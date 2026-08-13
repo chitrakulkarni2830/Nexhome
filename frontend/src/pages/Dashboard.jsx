@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useDevices } from '../context/DeviceContext';
+import { CORE_SERVICE_URL, INGESTION_SERVICE_URL } from '../config';
 
 const Dashboard = () => {
   const { token } = useAuth();
@@ -20,7 +21,7 @@ const Dashboard = () => {
 
   // Real-time telemetry integration via SSE
   useEffect(() => {
-    const eventSource = new EventSource('http://localhost:3001/stream');
+    const eventSource = new EventSource(`${INGESTION_SERVICE_URL}/stream`);
     
     eventSource.onmessage = (event) => {
       try {
@@ -66,7 +67,7 @@ const Dashboard = () => {
   const fetchDevices = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:8000/api/devices/', {
+      const res = await fetch(`${CORE_SERVICE_URL}/api/devices/`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -86,7 +87,7 @@ const Dashboard = () => {
       // Optimistic update
       setDevices(prev => prev.map(d => d.id === id ? { ...d, is_on: !currentStatus } : d));
       
-      const res = await fetch(`http://localhost:8000/api/devices/${id}`, {
+      const res = await fetch(`${CORE_SERVICE_URL}/api/devices/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +110,7 @@ const Dashboard = () => {
     e.preventDefault();
     setAddingDevice(true);
     try {
-      const res = await fetch('http://localhost:8000/api/devices/', {
+      const res = await fetch(`${CORE_SERVICE_URL}/api/devices/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +135,7 @@ const Dashboard = () => {
     if (!window.confirm("Are you sure you want to remove this device?")) return;
     
     try {
-      const res = await fetch(`http://localhost:8000/api/devices/${id}`, {
+      const res = await fetch(`${CORE_SERVICE_URL}/api/devices/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

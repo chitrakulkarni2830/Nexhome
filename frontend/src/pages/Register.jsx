@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { CORE_SERVICE_URL } from '../config';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -18,7 +19,7 @@ const Register = () => {
 
     try {
       // 1. Register
-      const registerResponse = await fetch('http://localhost:8000/api/auth/register', {
+      const registerResponse = await fetch(`${CORE_SERVICE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
@@ -30,7 +31,7 @@ const Register = () => {
       }
 
       // 2. Auto Login after successful registration
-      const loginResponse = await fetch('http://localhost:8000/api/auth/login', {
+      const loginResponse = await fetch(`${CORE_SERVICE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
