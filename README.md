@@ -1,118 +1,129 @@
-# NexHome: Smart Home IoT Platform 🏠✨
+# NexHome
 
-![Dashboard Screen](docs/images/dashboard_screen.png)
+NexHome is a full-stack IoT device management platform built with React, FastAPI, Node.js, PostgreSQL, and real-time Server-Sent Events. It provides a reliable, responsive, and secure interface for monitoring and controlling connected smart devices.
 
-NexHome is a modern, microservices-based Smart Home IoT platform. This project serves as a comprehensive full-stack developer portfolio piece designed to demonstrate a production-inspired connected home ecosystem, clean architectural design, and the ability to build and integrate distributed systems.
+## Features
 
-## 🚀 Features
+- **JWT Authentication**: Secure user registration and login.
+- **Device Management**: Add, remove, and toggle connected devices.
+- **Device State Monitoring**: Instantly view the status of smart lights, thermostats, locks, and plugs.
+- **Real-Time Telemetry Streaming**: Monitor dynamic device metrics over a continuous connection.
+- **SSE-based Live Updates**: Push architecture for instant UI synchronization.
+- **PostgreSQL Persistence**: Robust relational data storage for users and devices.
+- **REST APIs**: Fast, typed endpoints built with Python and FastAPI.
+- **Responsive Dashboard**: Polished, modern UI built with Vite and Tailwind CSS.
 
-- **Secure Authentication System:** JSON Web Tokens (JWT), robust password hashing, protected API routes, and React Router private routing.
-- **Dynamic Device Management:** Add, remove, and toggle smart devices directly from the UI with optimistic updates and seamless error handling.
-- **Real-Time Telemetry:** Fast data ingestion via Express.js, streaming live updates directly to connected clients via Server-Sent Events (SSE).
-- **Modern UI/UX:** Clean, responsive interface built with React, Vite, and Tailwind CSS.
-- **Robust Testing:** E2E automation with Playwright and robust Python backend unit tests with PyTest.
+## Live Demo
 
-## 🏗 Architecture & Tech Stack
+**Frontend Dashboard**:  
+https://nexhome-ten.vercel.app
 
-NexHome is composed of three primary services running in tandem:
+**Core API Endpoint**:  
+https://nexhome-lxfq.onrender.com
 
-### 1. Frontend (React + Vite + Tailwind CSS)
-- Located in `/frontend`.
-- Provides the responsive user interface and unified global state management via the Context API.
-- Connects to the Core Service via REST and to the Ingestion Service via EventSource for live updates.
+**Ingestion Service Endpoint**:  
+https://nexhome-ingetion.onrender.com
 
-### 2. Core Service (FastAPI + Python)
-- Located in `/core-service`.
-- Serves as the primary CRUD backend and authentication provider.
-- Uses **SQLAlchemy** to manage relational data in a lightweight SQLite database.
-- Implements stateless JWT authentication using `passlib` and `PyJWT`.
+**Core API Documentation (Swagger)**:  
+https://nexhome-lxfq.onrender.com/docs
 
-### 3. Ingestion Service (Express.js + Node.js)
-- Located in `/ingestion-service`.
-- Purpose-built for high-throughput IoT metrics ingestion.
-- Exposes a `POST /telemetry` route for devices and a `GET /stream` Server-Sent Events (SSE) route to broadcast metrics directly to the React application.
+**Health Endpoints**:  
+- Core Health: https://nexhome-lxfq.onrender.com/health
+- Ingestion Health: https://nexhome-ingetion.onrender.com/health
 
----
+## Tech Stack
 
-## 📸 Screenshots
+- **React** & **Vite** (Frontend)
+- **Tailwind CSS** (Styling)
+- **FastAPI** & **Python** (Core Backend)
+- **SQLAlchemy** & **PostgreSQL** (ORM and Database)
+- **Supabase** (Database Hosting)
+- **Node.js** & **Express** (Telemetry Ingestion)
+- **JWT** (Security)
+- **Server-Sent Events** (Real-time data stream)
+- **Render** (Backend Hosting)
+- **Vercel** (Frontend Hosting)
 
-### Login & Authentication
-![Login Screen](docs/images/login_screen.png)
-*Secure authentication UI complete with instant form validation.*
+## Architecture & Deployment
 
-### New Account Registration
-![Register Screen](docs/images/register_screen.png)
-*Registration seamlessly hashes passwords and automatically provisions JWT tokens.*
+The application is deployed across three scalable environments:
 
-### Real-Time Device Dashboard
-![Dashboard Screen](docs/images/dashboard_screen.png)
-*Manage devices and see live telemetry changes as they happen via SSE.*
+```text
+Vercel
+   ↓
+React Frontend
+   ↓
+Render Core Service
+   ↓
+Supabase PostgreSQL
 
----
+Vercel
+   ↓
+EventSource / SSE
+   ↓
+Render Ingestion Service
+```
 
-## 🛠 Installation & Setup
+- **Frontend** (Vercel) serves the React SPA.
+- **Core Service** (Render) handles authentication and CRUD operations, connecting directly to **Supabase PostgreSQL**.
+- **Ingestion Service** (Render) handles high-throughput telemetry streams using Node.js and broadcasts real-time events to the frontend via SSE.
 
-You will need three separate terminal windows to run this platform locally. Ensure you have Python 3.9+, Node.js (v18+), and `npm` installed.
+## Local Development
 
-### 1. Start the Core Backend (FastAPI)
+To run the platform locally, follow these steps:
+
+### 1. Core Service
 ```bash
 cd core-service
-python3 -m venv venv
+python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload
 ```
-> The API will be available at `http://localhost:8000`. You can view the interactive Swagger docs at `http://localhost:8000/docs`.
 
-### 2. Start the Ingestion Service (Node.js)
+### 2. Ingestion Service
 ```bash
 cd ingestion-service
 npm install
 npm start
 ```
-> The ingestion service will start listening on `http://localhost:3001`.
 
-### 3. Start the Frontend Application (React)
+### 3. Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-> The Vite dev server will host the application at `http://localhost:5173`.
 
----
+## Environment Variables
 
-## 📡 Testing Real-Time Telemetry
+For local development, create `.env` files in the respective directories. **Do not commit secrets.**
 
-You can easily simulate a smart home device sending metrics (e.g., temperature) to see the real-time SSE stream in action:
-
-1. Log into the application and add a **Thermostat** device (let's assume it gets ID `1`).
-2. Run the following `curl` command to simulate the smart device pushing data:
-
-```bash
-curl -X POST http://localhost:3001/telemetry \
-  -H "Content-Type: application/json" \
-  -d '{"device_id": 1, "metrics": {"temperature": 23.5}}'
+### Frontend (`frontend/.env`)
+```text
+VITE_CORE_SERVICE_URL=http://localhost:8000
+VITE_INGESTION_SERVICE_URL=http://localhost:3001
 ```
 
-3. Watch the dashboard card update instantly without a page reload!
-
----
-
-## 🧪 Running Tests
-
-### Backend Unit Tests (PyTest)
-```bash
-cd core-service
-source venv/bin/activate
-pytest
+### Core Service (`core-service/.env`)
+```text
+DATABASE_URL=postgresql+psycopg://postgres:[PASSWORD]@[HOST]:5432/postgres
+JWT_SECRET=your_secure_random_string
+CORS_ALLOWED_ORIGINS=http://localhost:5173
 ```
 
-### Frontend E2E Tests (Playwright)
-```bash
-cd frontend
-npx playwright test
+### Ingestion Service (`ingestion-service/.env`)
+```text
+CORS_ALLOWED_ORIGINS=http://localhost:5173
 ```
 
----
-*Built with ❤️ to demonstrate modern microservices and real-time frontend integration.*
+## Project Structure
+
+```text
+NexHome/
+├── frontend/               # React Vite SPA
+├── core-service/           # FastAPI backend
+├── ingestion-service/      # Node.js SSE server
+├── render.yaml             # Render deployment configuration
+└── README.md
+```
