@@ -1,7 +1,7 @@
 import os
-import jwt
+import jwt # type: ignore
 from datetime import datetime, timedelta, timezone
-from passlib.context import CryptContext
+from passlib.context import CryptContext # type: ignore
 
 SECRET_KEY = os.getenv("JWT_SECRET", "super_secret_key_for_nexhome_portfolio_project")
 ALGORITHM = "HS256"
