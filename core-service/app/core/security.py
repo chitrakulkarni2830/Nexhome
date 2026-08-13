@@ -1,8 +1,9 @@
+import os
 import jwt
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 
-SECRET_KEY = "super_secret_key_for_nexhome_portfolio_project" # In production, read from env
+SECRET_KEY = os.getenv("JWT_SECRET", "super_secret_key_for_nexhome_portfolio_project")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

@@ -5,7 +5,10 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+const corsOriginsStr = process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:5173';
+const allowedOrigins = corsOriginsStr.split(',').map(o => o.trim());
+
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 // In-memory store for recent telemetry data
@@ -64,7 +67,12 @@ app.get('/stream', (req, res) => {
     
     sseClients.push(res);
     
+    const heartbeat = setInterval(() => {
+        res.write(': heartbeat\n\n');
+    }, 30000);
+    
     req.on('close', () => {
+        clearInterval(heartbeat);
         sseClients = sseClients.filter(client => client !== res);
     });
 });
